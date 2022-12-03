@@ -112,8 +112,28 @@ try:
     
 except:
     driver.quit()
+group_for_posting = 'https://www.facebook.com/groups/1299541377514201'
+directory = 'C:\pyprojects\scraping fb\image folder'
+dir_list = os.listdir(directory)
+
+for element in dir_list:
+    try:
+
+        driver.get(group_for_posting)
+        time.sleep(1)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div/input').send_keys(directory+'\\'+element)
+        time.sleep(2)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div[1]/div').click()
+        time.sleep(5)
+    except:
+        continue
 
 
+folder = 'C:\pyprojects\scraping fb\image folder'
+
+for filename in os.listdir(folder):
+    file_path = os.path.join(folder,filename)
+    os.remove(file_path)
 data_file = 'Fb.xlsx'
 
 wb = load_workbook(data_file)
@@ -131,19 +151,23 @@ for row in all_rows:
     row_values.append(row[0].value)
 
 my_set = set(row_values)
-for element in my_set:
-    if 'See more' in element:
-        continue
-    driver.get('https://www.facebook.com/groups/1299541377514201')
-    time.sleep(0.2)
-    e = WebDriverWait(driver, 20).until(
-    EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div')))
-    e= driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div').click()
-    time.sleep(1)
-    post_space = driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div')
-    post_space.click()
-    driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div/div/div/div/div[2]/div/div/div/div[1]/span').send_keys(element)
-    time.sleep(0.1)
-    driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div').click()
-    time.sleep(5)
-    
+try:
+        
+    for element in my_set:
+        if 'See more' in element:
+            continue
+        driver.get(group_for_posting)
+        time.sleep(0.2)
+        e = WebDriverWait(driver, 20).until(
+        EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div')))
+        e= driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div').click()
+        time.sleep(1)
+        post_space = driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div')
+        post_space.click()
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div/div/div/div/div[2]/div/div/div/div[1]/span').send_keys(element)
+        time.sleep(0.1)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div').click()
+        time.sleep(5)
+except:
+    pass
+
