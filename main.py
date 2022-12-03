@@ -5,10 +5,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from PIL import Image
+import requests
+import io
+import os
 import pandas as pd
-import numpy
 from numpy import random
 import time
+from openpyxl import load_workbook
 
 PATH = 'venv\msedgedriver.exe'
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.62'
@@ -28,6 +32,9 @@ driver = webdriver.Edge(service=edge_service,options=edge_options)
 
 text_contents=[]
 
+num=0
+image_directory = 'image folder'
+full_directory = 'C:\pyprojects\scraping fb\image folder'
 driver.get('https://www.facebook.com/')
 time.sleep(1)
 username = 'tefavo1297@cnogs.com'
@@ -82,20 +89,20 @@ try:
                 except:
                     pass
                 try:
+                    image = post.find_element(By.TAG_NAME,'img').get_attribute("src")
+                    
+                    try:
 
-                    image = post.find_element(By.TAG_NAME,'img').get_attribute("alt")
-                    img_text =''
-                    num = 0
-                    for i in image:
-                        if i == '\'' and num ==0:
-                            num+=1
-                        elif i == '\'' and num ==1:
-                            break
-                        else:
-                            img_text +=i
-                        
-                    if img_text !='':
-                            text_contents.append(img_text)
+                        img_content = requests.get(image).content
+                        img_file = io.BytesIO(img_content)
+                        img = Image.open(img_file)
+                        file_pth = image_directory+f'\img{num}.jpeg'
+                        with open(file_pth,'wb') as file:
+                            img.save(file,'JPEG')
+                        num+=1
+
+                    except:
+                        pass
                 except:
                     pass
 
@@ -105,3 +112,38 @@ try:
     
 except:
     driver.quit()
+
+
+data_file = 'Fb.xlsx'
+
+wb = load_workbook(data_file)
+
+ws = wb['Sheet1']
+
+all_rows = list(ws.rows)
+row_values = []
+
+first = True
+for row in all_rows:
+    if first:
+        first=False
+        continue
+    row_values.append(row[0].value)
+
+my_set = set(row_values)
+for element in my_set:
+    if 'See more' in element:
+        continue
+    driver.get('https://www.facebook.com/groups/1299541377514201')
+    time.sleep(0.2)
+    e = WebDriverWait(driver, 20).until(
+    EC.element_to_be_clickable((By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div')))
+    e= driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[1]/div').click()
+    time.sleep(1)
+    post_space = driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div')
+    post_space.click()
+    driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div/div/div/div/div[2]/div/div/div/div[1]/span').send_keys(element)
+    time.sleep(0.1)
+    driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div').click()
+    time.sleep(5)
+    
