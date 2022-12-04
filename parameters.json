@@ -1,0 +1,8 @@
+{
+    "email" : "tefavo1297@cnogs.com",
+    "password" : "abc123456789",
+    "post_link" : "https://www.facebook.com/groups/1299541377514201",
+    "description": "Input description",
+    "schedule_hours_increment" : 4,
+    "image_saving_directory": "C:\\pyprojects\\scraping fb\\image folder"
+}

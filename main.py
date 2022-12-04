@@ -1,10 +1,3 @@
-from selenium import webdriver
-from selenium.webdriver.edge.options import Options
-from selenium.webdriver.edge.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from PIL import Image
 import requests
 import io
@@ -13,6 +6,19 @@ import pandas as pd
 from numpy import random
 import time
 from openpyxl import load_workbook
+from selenium import webdriver
+from selenium.webdriver.edge.options import Options
+from selenium.webdriver.edge.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from datetime import date
+from datetime import datetime,timedelta
+import json
+
+f = open("parameters.json")
+data = json.load(f)
 
 PATH = 'venv\msedgedriver.exe'
 user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.62'
@@ -34,11 +40,11 @@ text_contents=[]
 
 num=0
 image_directory = 'image folder'
-full_directory = 'C:\pyprojects\scraping fb\image folder'
+full_directory = data["image_saving_directory"]
 driver.get('https://www.facebook.com/')
 time.sleep(1)
-username = 'tefavo1297@cnogs.com'
-password = 'abc123456789'
+username = data["email"]
+password = data["password"]
 user_box = driver.find_element(By.XPATH,'//*[@id="email"]').send_keys(username)
 user_pw = driver.find_element(By.XPATH,'//*[@id="pass"]').send_keys(password,Keys.RETURN)
 time.sleep(2)
@@ -96,7 +102,7 @@ try:
                         img_content = requests.get(image).content
                         img_file = io.BytesIO(img_content)
                         img = Image.open(img_file)
-                        file_pth = image_directory+f'\img{num}.jpeg'
+                        file_pth = full_directory+f'\img{num}.jpeg'
                         with open(file_pth,'wb') as file:
                             img.save(file,'JPEG')
                         num+=1
@@ -112,28 +118,49 @@ try:
     
 except:
     driver.quit()
-group_for_posting = 'https://www.facebook.com/groups/1299541377514201'
-directory = 'C:\pyprojects\scraping fb\image folder'
-dir_list = os.listdir(directory)
+group_for_posting = data["post_link"]
 
+dir_list = os.listdir(full_directory)
+desc =  data["description"]
+now = datetime.now() + timedelta(minutes=1)
 for element in dir_list:
     try:
 
+        date = now.strftime("%B %d, %Y")
+        time_now_hours = now.strftime("%H")
+        time_int = int(time_now_hours)
+        if time_int > 12:
+            time_int-=12
+            
+        time_now_hours = str(time_int)
+
+        time_now_mins = now.strftime(":%M%p")
+        time_now = time_now_hours + time_now_mins
+
+        
+        
+        
         driver.get(group_for_posting)
         time.sleep(1)
-        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div/input').send_keys(directory+'\\'+element)
+        file_name = full_directory+'\\'+element
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[3]/div/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div[2]/div/div/div/div[1]/div/div/div/div/div[2]/div/input').send_keys(file_name)
         time.sleep(2)
-        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div[1]/div').click()
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[2]/div[1]/div[1]/div[1]/div[1]/div/div/div/div/div[2]/div').send_keys(desc)
+        time.sleep(1)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[1]/div/div/div[1]/div/div[3]/div[2]/div[2]/span/div/div').click()
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[2]/div/div/div[2]/div[1]/div/div/div[1]/div/label/div/div[2]/div/input').send_keys(date)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[2]/div/div/div[2]/div[1]/div/div/div[2]/div/label/div/div[2]/div/input').send_keys(time_now)
+        driver.find_element(By.XPATH,'/html/body/div[1]/div/div[1]/div/div[4]/div/div/div[1]/div/div[2]/div/div/div/div/div[1]/form/div/div[2]/div/div/div[2]/div[2]').click()
         time.sleep(5)
+        os.remove(file_name)
+        now+=timedelta(hours=data["schedule_hours_increment"])
     except:
         continue
 
 
 folder = 'C:\pyprojects\scraping fb\image folder'
 
-for filename in os.listdir(folder):
-    file_path = os.path.join(folder,filename)
-    os.remove(file_path)
+
 data_file = 'Fb.xlsx'
 
 wb = load_workbook(data_file)
